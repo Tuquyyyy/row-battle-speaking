@@ -1,4 +1,4 @@
-# Row Battle — IELTS Speaking (Mid Test 2)
+# Row Battle - IELTS Speaking
 
 Projector game for the IELTS Speaking Mid Test 2 (topic: Study & Learning Languages).
 Rows compete through Think → Pair → Share rounds with a timer, random name picker, twist cards and live scores.

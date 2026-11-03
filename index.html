@@ -185,7 +185,7 @@ h1,h2,h3,p { margin: 0; }
 <div id="viewport"><div id="deck"></div></div>
 
 <script>
-/* ===================== CONTENT (IELTS Mid Test 2 — Speaking) ===================== */
+/* ===================== CONTENT (IELTS Speaking) ===================== */
 const QUESTIONS = [
   { part:1, label:'Part 1 · Study', q:'What is your favourite subject? Why?',
     help:['My favourite subject is … <em>because</em> …','I find it … (interesting / useful / easy)','<em>For example</em>, …'], think:20, pair:90 },
@@ -224,7 +224,7 @@ const TWISTS = [
   { key:'double', title:'Double points', text:'Points for this answer count ×2.' },
   { key:'help',   title:'Help line', text:'The speaker may ask ONE teammate for help.' },
   { key:'steal',  title:'Steal!', text:'Answer too short? Another team raises hands and steals the points.' },
-  { key:'extend', title:'Why? Why? Why?', text:'The teacher asks one more "Why?" — answer it for +1 bonus.' },
+  { key:'extend', title:'Why? Why? Why?', text:'The teacher asks one more "Why?" - answer it for +1 bonus.' },
 ];
 const PHASES = ['think','pair','share'];
 const PHASE = { think:{label:'Think', sub:'Alone', c:'var(--think)'}, pair:{label:'Pair', sub:'Partner', c:'var(--pair)'}, share:{label:'Share', sub:'Class', c:'var(--share)'} };
@@ -321,9 +321,9 @@ function scoreStrip(){
 
 function titleSlide(){
   return `<div class="slide title-slide">
-    <div class="eyebrow">IELTS Speaking · Mid Test 2</div>
+    <div class="eyebrow">IELTS Speaking</div>
     <h1 class="display big rise">Row<span>Battle</span></h1>
-    <p class="sub">Topic: <b>Study &amp; Learning Languages</b><br>Think · Pair · Share — every row is a team.</p>
+    <p class="sub">Topic: <b>Study &amp; Learning Languages</b><br>Think · Pair · Share - every row is a team.</p>
     <div class="blocks">${TEAMS.map((t,i)=>`<div style="--c:${t.c};${i>=S.teamCount?'opacity:.25':''}">${t.name}</div>`).join('')}</div>
   </div>`;
 }
@@ -332,7 +332,7 @@ function rulesSlide(){
   const R=[
     ['Each row is a team','Stay in your seat. <b>No moving chairs.</b> Your row works together.','var(--t3)'],
     ['Think','Read the question. Write <b>key words</b> on your desk. <b>No talking.</b>','var(--think)'],
-    ['Pair','Turn to the person next to you. Both partners answer — <b>English only!</b>','var(--pair)'],
+    ['Pair','Turn to the person next to you. Both partners answer - <b>English only!</b>','var(--pair)'],
     ['Share','The name picker chooses <b>one student</b>. Answer to the teacher.','var(--share)'],
     ['Score','Points go to the speaker’s row.<div class="pts" style="margin-top:10px"><span>+1 answer</span><span>+2 + reason</span><span>+3 + example</span></div>','var(--accent)'],
     ['Twist cards','Watch out for <b>Double points</b>, <b>Help line</b>, <b>Steal!</b> and <b>Why? Why? Why?</b><br>Vietnamese in Pair time = <b>−1</b>.','var(--t0)'],
