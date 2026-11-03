@@ -107,8 +107,13 @@ h1,h2,h3,p { margin: 0; }
 .tbox h3 { display: flex; justify-content: space-between; align-items: center; font-size: 26px; font-weight: 800; }
 .tbox h3 i { width: 22px; height: 22px; border-radius: 7px; background: var(--c); display: inline-block; margin-right: 10px; vertical-align: -3px; }
 .names { display: flex; flex-wrap: wrap; gap: 8px; }
-.name { border: 0; border-radius: 10px; padding: 8px 14px; background: var(--surface); font-weight: 800; font-size: 22px; }
-.name:hover { box-shadow: inset 0 0 0 3px var(--c); }
+.name { border-radius: 10px; padding: 6px 6px 6px 10px; background: var(--surface); font-weight: 800; font-size: 22px; display: inline-flex; align-items: center; gap: 8px; }
+.name b { font-size: 14px; color: var(--muted); min-width: 16px; }
+.name .x { border: 0; width: 30px; height: 30px; border-radius: 8px; background: var(--surface-2); font-size: 20px; font-weight: 900; line-height: 1; color: var(--muted); }
+.name .x:hover { background: var(--danger); color: #fff; }
+.name.off { background: transparent; box-shadow: inset 0 0 0 2px var(--line); color: var(--muted); text-decoration: line-through; }
+.name.off .x { text-decoration: none; }
+.name.off .x:hover { background: var(--share); }
 .seg { display: inline-flex; background: var(--surface); border-radius: 14px; padding: 5px; gap: 4px; box-shadow: var(--shadow); }
 .seg button { border: 0; border-radius: 10px; padding: 10px 18px; font-weight: 800; font-size: 18px; background: transparent; }
 .seg button.on { background: var(--accent); color: var(--accent-ink); }
@@ -214,11 +219,12 @@ const QUESTIONS = [
 ];
 const STUDENTS = ['Anna','Harry','Alan','Hannah','Serena','Alma','Thomas','Henry','Jay','Tina','Rider','Danny','Dragon','Berit','Jimmy','Lee','Benny','Lina','Linda'];
 const TEAMS = [
-  { name:'Coral',  c:'var(--t0)', soft:'var(--t0-soft)' },
-  { name:'Amber',  c:'var(--t1)', soft:'var(--t1-soft)' },
-  { name:'Teal',   c:'var(--t2)', soft:'var(--t2-soft)' },
-  { name:'Violet', c:'var(--t3)', soft:'var(--t3-soft)' },
+  { name:'Team 1', c:'var(--t0)', soft:'var(--t0-soft)' },
+  { name:'Team 2', c:'var(--t1)', soft:'var(--t1-soft)' },
+  { name:'Team 3', c:'var(--t2)', soft:'var(--t2-soft)' },
 ];
+/* Fixed seating: Team 1 = 6, Team 2 = 6, Team 3 = 7 (list order) */
+const TEAM_SIZES = [6,6,7];
 const PART_COLOR = { 1:'var(--t3)', 2:'var(--t1)', 3:'var(--t0)' };
 const TWISTS = [
   { key:'double', title:'Double points', text:'Points for this answer count ×2.' },
@@ -229,13 +235,13 @@ const TWISTS = [
 const PHASES = ['think','pair','share'];
 const PHASE = { think:{label:'Think', sub:'Alone', c:'var(--think)'}, pair:{label:'Pair', sub:'Partner', c:'var(--pair)'}, share:{label:'Share', sub:'Class', c:'var(--share)'} };
 const PRESET = [0,2,3,5,6,7,8];
-const KEY = 'rowbattle-ielts-mid2-slides';
+const KEY = 'rowbattle-ielts-fixed3';
 
 /* ===================== STATE ===================== */
 function defaultState(){
-  const teamOf={}; STUDENTS.forEach((s,i)=>teamOf[s]=Math.min(3,Math.floor(i/5)));
-  return { slide:0, teamCount:4, teamOf, scores:[0,0,0,0], phase:'think', timeLeft:0, total:0, running:false,
-    picked:null, picks:[], twist:null, rounds:[...PRESET], confirm:false };
+  const teamOf={}; STUDENTS.forEach((s,i)=>teamOf[s]= i<TEAM_SIZES[0]?0 : i<TEAM_SIZES[0]+TEAM_SIZES[1]?1 : 2);
+  return { slide:0, teamCount:3, teamOf, scores:[0,0,0], phase:'think', timeLeft:0, total:0, running:false,
+    picked:null, picks:[], twist:null, rounds:[...PRESET], confirm:false, absent:[] };
 }
 function load(){ try{ const r=localStorage.getItem(KEY); return r?JSON.parse(r):null; }catch(e){ return null; } }
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify({...S, running:false, confirm:false})); }catch(e){} }
@@ -258,7 +264,9 @@ function beep(f=880,d=.16,n=1){ try{ actx=actx||new (window.AudioContext||window
 const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmt=s=>Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
-const members=t=>STUDENTS.filter(s=>S.teamOf[s]===t);
+const roster=t=>STUDENTS.filter(s=>S.teamOf[s]===t);
+const isAbsent=s=>(S.absent||[]).includes(s);
+const members=t=>roster(t).filter(s=>!isAbsent(s));
 const teamVars=t=>`--c:${TEAMS[t].c};--soft:${TEAMS[t].soft}`;
 const teamIdx=()=>[...Array(S.teamCount).keys()];
 
@@ -347,18 +355,18 @@ function teamsSlide(){
   const mins=Math.round(S.rounds.reduce((a,i)=>a+QUESTIONS[i].think+QUESTIONS[i].pair+75,0)/60);
   return `<div class="slide">
     <div class="head">
-      <div><div class="eyebrow">Click a name to move it to the next team</div><h1 class="display">The <span>teams</span></h1></div>
+      <div><div class="eyebrow">Seating plan · press × if a student is absent</div><h1 class="display">The <span>teams</span></h1></div>
       <div class="row">
-        <div class="seg"><button data-teams="3" class="${S.teamCount===3?'on':''}">3 rows</button><button data-teams="4" class="${S.teamCount===4?'on':''}">4 rows</button></div>
-        <button class="btn sm" id="shuffle">Shuffle</button>
         <button class="btn sm" id="reset">Reset scores</button>
       </div>
     </div>
     ${S.confirm?`<div class="confirm">Reset all scores and picked names?<div class="row"><button class="btn sm primary" id="confirmYes">Yes, reset</button><button class="btn sm" id="confirmNo">Cancel</button></div></div>`:''}
     <div class="teamsgrid" style="--cols:${S.teamCount}">${teamIdx().map(t=>`
       <div class="tbox" style="${teamVars(t)}">
-        <h3><span><i></i>${TEAMS[t].name}</span><span>${members(t).length} · ${S.scores[t]} pts</span></h3>
-        <div class="names">${members(t).map(s=>`<button class="name" data-cycle="${esc(s)}">${esc(s)}</button>`).join('')}</div>
+        <h3><span><i></i>${TEAMS[t].name}</span><span>${members(t).length} present · ${S.scores[t]} pts</span></h3>
+        <div class="names">${roster(t).map((s,i)=> isAbsent(s)
+          ? `<span class="name off"><b>${i+1}</b>${esc(s)}<button class="x" data-back="${esc(s)}" aria-label="Mark ${esc(s)} present" title="Present again">↺</button></span>`
+          : `<span class="name"><b>${i+1}</b>${esc(s)}<button class="x" data-absent="${esc(s)}" aria-label="Mark ${esc(s)} absent" title="Absent">×</button></span>`).join('')}</div>
       </div>`).join('')}</div>
     <div class="panel" style="padding:20px 24px;display:grid;gap:12px">
       <div class="row" style="justify-content:space-between"><span style="font-weight:800;font-size:20px">Questions in this game · about ${mins} min</span>
@@ -406,7 +414,7 @@ function questionSlide(){
 
 function shareBlock(){
   const p=S.picked, tw=S.twist?TWISTS.find(x=>x.key===S.twist):null, mult=S.twist==='double'?2:1;
-  const left=STUDENTS.filter(s=>!S.picks.includes(s)).length;
+  const left=STUDENTS.filter(s=>!S.picks.includes(s)&&!isAbsent(s)).length;
   let scoring='';
   if(p){ const t=S.teamOf[p];
     scoring=`<div class="row">${[1,2,3].map(n=>`<button class="btn team" style="${teamVars(t)}" data-score="${n*mult}" data-team="${t}">+${n*mult}</button>`).join('')}
@@ -416,7 +424,7 @@ function shareBlock(){
     <div class="ticket" ${p?`style="${teamVars(S.teamOf[p])}"`:''}>
       <div class="eyebrow">${p?'Speaker':'Who answers?'}</div>
       <div class="who ${p?'rise':''}" id="who">${p?esc(p):'? ? ?'}</div>
-      ${p?`<span class="teamline">${TEAMS[S.teamOf[p]].name} row</span>`:''}
+      ${p?`<span class="teamline">${TEAMS[S.teamOf[p]].name}</span>`:''}
     </div>
     ${tw?`<div class="twist rise"><span class="display">${tw.title}</span><p>${tw.text}</p></div>`:''}
     ${p?scoring:`<button class="btn primary" id="spin" style="font-size:30px;padding:22px">Pick a student</button><span class="hint">${left} students not picked yet · key P</span>`}
@@ -467,8 +475,9 @@ function render(animate){
 
 /* ===================== ACTIONS ===================== */
 function spin(){
-  let pool=STUDENTS.filter(s=>!S.picks.includes(s));
-  if(!pool.length){ S.picks=[]; pool=[...STUDENTS]; }
+  const present=STUDENTS.filter(s=>!isAbsent(s));
+  let pool=present.filter(s=>!S.picks.includes(s));
+  if(!pool.length){ S.picks=[]; pool=[...present]; }
   const final=pool[Math.floor(Math.random()*pool.length)];
   $$('#spin').forEach(b=>b.disabled=true); S.twist=null; S.picked=null;
   if(!$('#who')){ render(); }
@@ -488,12 +497,10 @@ function toggleFS(){ try{ if(!document.fullscreenElement) document.documentEleme
 function bind(){
   $('#prev').onclick=prev; $('#next').onclick=next; $('#fs').onclick=toggleFS;
   $('#toTeams').onclick=()=>goSlide(2);
-  $$('[data-cycle]').forEach(b=>b.onclick=()=>{ const s=b.dataset.cycle; S.teamOf[s]=(S.teamOf[s]+1)%S.teamCount; save(); render(); });
-  $$('[data-teams]').forEach(b=>b.onclick=()=>{ S.teamCount=+b.dataset.teams; const per=Math.ceil(STUDENTS.length/S.teamCount);
-    STUDENTS.forEach((s,i)=>S.teamOf[s]=Math.min(S.teamCount-1,Math.floor(i/per))); save(); render(); });
-  const sh=$('#shuffle'); if(sh) sh.onclick=()=>{ [...STUDENTS].sort(()=>Math.random()-.5).forEach((s,i)=>S.teamOf[s]=i%S.teamCount); save(); render(); };
+  $$('[data-absent]').forEach(b=>b.onclick=()=>{ S.absent=[...(S.absent||[]), b.dataset.absent]; save(); render(); });
+  $$('[data-back]').forEach(b=>b.onclick=()=>{ S.absent=(S.absent||[]).filter(x=>x!==b.dataset.back); save(); render(); });
   const rs=$('#reset'); if(rs) rs.onclick=()=>{ S.confirm=true; render(); };
-  const cy=$('#confirmYes'); if(cy) cy.onclick=()=>{ S.scores=[0,0,0,0]; S.picks=[]; S.confirm=false; save(); render(); };
+  const cy=$('#confirmYes'); if(cy) cy.onclick=()=>{ S.scores=[0,0,0]; S.picks=[]; S.confirm=false; save(); render(); };
   const cn=$('#confirmNo'); if(cn) cn.onclick=()=>{ S.confirm=false; render(); };
   $$('[data-toggle]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.toggle;
     S.rounds=S.rounds.includes(i)?S.rounds.filter(x=>x!==i):[...S.rounds,i].sort((a,b)=>a-b); if(!S.rounds.length) S.rounds=[i]; save(); render(); });
