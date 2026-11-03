@@ -84,13 +84,13 @@ h1,h2,h3,p { margin: 0; }
 
 /* ---------- title slide ---------- */
 .title-slide { justify-content: center; padding-left: 120px; }
-.title-slide .big { font-size: 250px; line-height: .82; }
+.title-slide .big { font-size: 220px; line-height: .82; }
 .title-slide .big span { color: var(--accent); display: block; }
 .title-slide .sub { font-size: 34px; font-weight: 700; max-width: 900px; color: var(--muted); }
 .title-slide .sub b { color: var(--ink); }
-.blocks { position: absolute; right: 100px; top: 50%; transform: translateY(-58%); display: grid; grid-template-columns: 420px; gap: 20px; }
-.blocks div { height: 150px; border-radius: 28px; background: var(--c); display: flex; align-items: center; justify-content: space-between; padding: 0 34px; font-family: var(--f-display); font-stretch: 75%; font-weight: 900; font-size: 64px; text-transform: uppercase; color: #141A33; }
-.blocks div span { font-size: 22px; font-weight: 800; letter-spacing: .12em; opacity: .7; }
+.blocks { position: absolute; right: 90px; top: 50%; transform: translateY(-58%); display: grid; grid-template-columns: 380px; gap: 20px; }
+.blocks div { height: 150px; border-radius: 28px; background: var(--c); display: flex; flex-direction: column; justify-content: center; gap: 6px; padding: 0 32px; font-family: var(--f-display); font-stretch: 75%; font-weight: 900; font-size: 60px; line-height: .95; text-transform: uppercase; color: #141A33; overflow: hidden; }
+.blocks div span { order: -1; font-family: var(--f-body); font-size: 18px; font-weight: 800; letter-spacing: .16em; opacity: .7; }
 
 /* ---------- rules slide ---------- */
 .rules { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; flex: 1; }
