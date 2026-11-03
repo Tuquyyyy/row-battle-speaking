@@ -88,8 +88,9 @@ h1,h2,h3,p { margin: 0; }
 .title-slide .big span { color: var(--accent); display: block; }
 .title-slide .sub { font-size: 34px; font-weight: 700; max-width: 900px; color: var(--muted); }
 .title-slide .sub b { color: var(--ink); }
-.blocks { position: absolute; right: 90px; top: 110px; display: grid; grid-template-columns: repeat(2, 190px); gap: 18px; transform: rotate(-6deg); }
-.blocks div { height: 190px; border-radius: 28px; background: var(--c); display: grid; place-items: end start; padding: 18px; font-family: var(--f-display); font-stretch: 75%; font-weight: 900; font-size: 40px; text-transform: uppercase; color: #141A33; }
+.blocks { position: absolute; right: 100px; top: 50%; transform: translateY(-58%); display: grid; grid-template-columns: 420px; gap: 20px; }
+.blocks div { height: 150px; border-radius: 28px; background: var(--c); display: flex; align-items: center; justify-content: space-between; padding: 0 34px; font-family: var(--f-display); font-stretch: 75%; font-weight: 900; font-size: 64px; text-transform: uppercase; color: #141A33; }
+.blocks div span { font-size: 22px; font-weight: 800; letter-spacing: .12em; opacity: .7; }
 
 /* ---------- rules slide ---------- */
 .rules { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; flex: 1; }
@@ -219,9 +220,9 @@ const QUESTIONS = [
 ];
 const STUDENTS = ['Anna','Harry','Alan','Hannah','Serena','Alma','Thomas','Henry','Jay','Tina','Rider','Danny','Dragon','Berit','Jimmy','Lee','Benny','Lina','Linda'];
 const TEAMS = [
-  { name:'Team 1', c:'var(--t0)', soft:'var(--t0-soft)' },
-  { name:'Team 2', c:'var(--t1)', soft:'var(--t1-soft)' },
-  { name:'Team 3', c:'var(--t2)', soft:'var(--t2-soft)' },
+  { name:'Phoenix', c:'var(--t0)', soft:'var(--t0-soft)' },
+  { name:'Thunder', c:'var(--t1)', soft:'var(--t1-soft)' },
+  { name:'Kraken',  c:'var(--t2)', soft:'var(--t2-soft)' },
 ];
 /* Fixed seating: Team 1 = 6, Team 2 = 6, Team 3 = 7 (list order) */
 const TEAM_SIZES = [6,6,7];
@@ -332,14 +333,14 @@ function titleSlide(){
     <div class="eyebrow">IELTS Speaking</div>
     <h1 class="display big rise">Row<span>Battle</span></h1>
     <p class="sub">Topic: <b>Study &amp; Learning Languages</b><br>Think · Pair · Share - every row is a team.</p>
-    <div class="blocks">${TEAMS.map((t,i)=>`<div style="--c:${t.c};${i>=S.teamCount?'opacity:.25':''}">${t.name}</div>`).join('')}</div>
+    <div class="blocks">${TEAMS.map((t,i)=>`<div style="--c:${t.c}">${t.name}<span>Team ${i+1}</span></div>`).join('')}</div>
   </div>`;
 }
 
 function rulesSlide(){
   const R=[
     ['Each row is a team','Stay in your seat. <b>No moving chairs.</b> Your row works together.','var(--t3)'],
-    ['Think','Read the question. Write <b>key words</b> on your desk. <b>No talking.</b>','var(--think)'],
+    ['Think','Read the question. Write <b>key words</b> in your notebook. <b>No talking.</b>','var(--think)'],
     ['Pair','Turn to the person next to you. Both partners answer - <b>English only!</b>','var(--pair)'],
     ['Share','The name picker chooses <b>one student</b>. Answer to the teacher.','var(--share)'],
     ['Score','Points go to the speaker’s row.<div class="pts" style="margin-top:10px"><span>+1 answer</span><span>+2 + reason</span><span>+3 + example</span></div>','var(--accent)'],
@@ -352,10 +353,9 @@ function rulesSlide(){
 }
 
 function teamsSlide(){
-  const mins=Math.round(S.rounds.reduce((a,i)=>a+QUESTIONS[i].think+QUESTIONS[i].pair+75,0)/60);
   return `<div class="slide">
     <div class="head">
-      <div><div class="eyebrow">Seating plan · press × if a student is absent</div><h1 class="display">The <span>teams</span></h1></div>
+      <div><div class="eyebrow">Seating plan</div><h1 class="display">The <span>teams</span></h1></div>
       <div class="row">
         <button class="btn sm" id="reset">Reset scores</button>
       </div>
@@ -369,7 +369,7 @@ function teamsSlide(){
           : `<span class="name"><b>${i+1}</b>${esc(s)}<button class="x" data-absent="${esc(s)}" aria-label="Mark ${esc(s)} absent" title="Absent">×</button></span>`).join('')}</div>
       </div>`).join('')}</div>
     <div class="panel" style="padding:20px 24px;display:grid;gap:12px">
-      <div class="row" style="justify-content:space-between"><span style="font-weight:800;font-size:20px">Questions in this game · about ${mins} min</span>
+      <div class="row" style="justify-content:space-between"><span style="font-weight:800;font-size:20px">Questions in this game</span>
         <button class="btn sm" id="preset">30-min preset</button></div>
       <div class="qpick">${QUESTIONS.map((q,i)=>`<button data-toggle="${i}" class="${S.rounds.includes(i)?'in':''}" style="--pc:${PART_COLOR[q.part]}" title="${esc(q.q)}">P${q.part} · ${q.part===2?'Cue card':(i<5?i+1:i-5)}</button>`).join('')}</div>
     </div>
@@ -378,7 +378,7 @@ function teamsSlide(){
 
 function questionSlide(){
   const q=curQ(), r=S.slide-Q0, idx=PHASES.indexOf(S.phase);
-  const instr = S.phase==='think' ? 'Read the question. Write <b>key words</b> on your desk. <b>No talking.</b>'
+  const instr = S.phase==='think' ? 'Read the question. Write <b>key words</b> in your notebook. <b>No talking.</b>'
     : (q.pairNote || 'Turn to your partner. Partner A answers first, then swap. Give a <b>reason</b> and an <b>example</b>.');
   const frac=S.total?S.timeLeft/S.total:0;
   return `<div class="slide">
@@ -414,7 +414,6 @@ function questionSlide(){
 
 function shareBlock(){
   const p=S.picked, tw=S.twist?TWISTS.find(x=>x.key===S.twist):null, mult=S.twist==='double'?2:1;
-  const left=STUDENTS.filter(s=>!S.picks.includes(s)&&!isAbsent(s)).length;
   let scoring='';
   if(p){ const t=S.teamOf[p];
     scoring=`<div class="row">${[1,2,3].map(n=>`<button class="btn team" style="${teamVars(t)}" data-score="${n*mult}" data-team="${t}">+${n*mult}</button>`).join('')}
@@ -427,7 +426,7 @@ function shareBlock(){
       ${p?`<span class="teamline">${TEAMS[S.teamOf[p]].name}</span>`:''}
     </div>
     ${tw?`<div class="twist rise"><span class="display">${tw.title}</span><p>${tw.text}</p></div>`:''}
-    ${p?scoring:`<button class="btn primary" id="spin" style="font-size:30px;padding:22px">Pick a student</button><span class="hint">${left} students not picked yet · key P</span>`}
+    ${p?scoring:`<button class="btn primary" id="spin" style="font-size:30px;padding:22px">Pick a student</button>`}
     <div style="margin-top:auto;display:grid;gap:10px">
       ${p?`<button class="btn sm" id="spin">Pick again</button>`:''}
       <details class="adjust"><summary>Adjust scores</summary>
